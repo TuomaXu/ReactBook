@@ -106,8 +106,217 @@ export default class App extends Component {
 
 ```
 
+### React元素事件参数
+
+在React中响应元素事件时，React框架会在事件中携带一个合成事件对象`event`。使用该对象可以对React元素进行更加准确的操作。
+
+**在 React 中必须明确的使用 preventDefault。**
+
+例如，传统的 HTML 中阻止链接默认打开一个新页面，你可以这样写：
+
+```
+<a href="#" onclick="console.log('The link was clicked.'); return false">
+  Click me
+</a>
+
+```
 
 
+在 React，应该这样来写：
+
+```
+
+import React, { Component } from 'react'
+
+export default class App extends Component {
+  render() {
+    return (
+      <div>
+        <a href="#" onClick={this.handleClick}>
+            Click me
+        </a>
+      </div>
+    )
+  }
+
+  handleClick = (event)=>{
+    event.preventDefault();
+    console.log('The link was clicked.');
+  }
+}
+
+```
+
+>在编写代码中，通常使用`e`来代替`event`
+
+
+React标准化了事件，使其在不同的浏览器中拥有一致的属性。
+
+您的事件处理函数将会接收`SyntheticEvent`的实例，一个基于浏览器原生事件的跨浏览器实现。它拥有和浏览器原生事件一样的接口，包括`stopPropagation()`和`preventDefault()`，除了那些所有浏览器功能一样的事件。
+
+如果由于某些原因，你得使用一些底层的浏览器事件，只需用`nativeEvent`的属性就能找到。每个`SyntheicEvent`对象都有如下属性：
+
+```
+boolean bubbles
+boolean cancelable
+DOMEventTarget currentTarget
+boolean defaultPrevented
+number eventPhase
+boolean isTrusted
+DOMEvent nativeEvent
+void preventDefault()
+boolean isDefaultPrevented()
+void stopPropagation()
+boolean isPropagationStopped()
+DOMEventTarget target
+number timeStamp
+string type
+```
+
+`SyntheticEvent`是共享的。那就意味着在调用事件回调之后，SyntheticEvent对象将会被重用，并且所有属性会被置空。这是出于性能因素考虑的。 因此，您无法以**异步方式**访问事件。
+
+```
+function onClick(event) {
+  console.log(event); // => nullified object.
+  console.log(event.type); // => "click"
+  const eventType = event.type; // => "click"
+
+  setTimeout(function() {
+    console.log(event.type); // => null
+    console.log(eventType); // => "click"
+  }, 0);
+
+  // Won't work. this.state.clickEvent will only contain null values.
+  this.setState({clickEvent: event});
+
+  // You can still export event properties.
+  this.setState({eventType: event.type});
+}
+```
+
+下面的事件处理函数由冒泡阶段的事件触发。在事件名后面加Capture就能在事件捕获阶段注册事件处理函数。举个例子，你可以使用`onClickCapture`代替`onClick`在事件捕获阶段来处理点击事件。
+
+
+* `Clipboard Events`
+* `Keyboard Events`
+* `Focus Events`
+* `Form Events`
+* `Touch Events`
+
+
+
+### 事件参考
+
+`Clipboard Events`
+
+事件名:
+```
+onCopy 
+onCut 
+onPaste
+```
+
+属性:
+
+```
+DOMDataTransfer 
+clipboardData
+```
+
+
+
+`Composition Events`
+
+事件名:
+
+```
+onCompositionEnd 
+onCompositionStart 
+onCompositionUpdate
+```
+
+属性:
+
+```
+string 
+data
+```
+
+`Keyboard Events`
+
+事件名:
+```
+onKeyDown 
+onKeyPress 
+onKeyUp
+```
+
+属性:
+
+```
+boolean altKey
+number charCode
+boolean ctrlKey
+boolean getModifierState(key)
+string key
+number keyCode
+string locale
+number location
+boolean metaKey
+boolean repeat
+boolean shiftKey
+number which
+```
+
+`Focus Events`
+
+事件名:
+
+```
+onFocus 
+onBlur
+```
+
+>这些焦点事件适用于React DOM中的所有元素，而不仅仅是表单元素。
+
+属性:
+
+```
+DOMEventTarget 
+relatedTarget
+```
+
+`Form Events`
+
+事件名:
+```
+onChange 
+onInput 
+onSubmit
+```
+
+`Touch Events`
+
+事件名:
+
+```
+onTouchCancel 
+onTouchEnd 
+onTouchMove 
+onTouchStart
+```
+
+属性:
+```
+boolean altKey
+DOMTouchList changedTouches
+boolean ctrlKey
+boolean getModifierState(key)
+boolean metaKey
+boolean shiftKey
+DOMTouchList targetTouches
+DOMTouchList touches
+```
 
 
 
