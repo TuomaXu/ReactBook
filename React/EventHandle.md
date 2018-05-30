@@ -421,7 +421,48 @@ export default class App extends Component {
 ```
 
 
-### 文件选择事件处理
+
+
+### 非受控组件事件处理
+
+在大多数情况下，我们推荐使用 受控组件 来实现表单。 在受控组件中，表单数据由 React 组件处理。如果让表单数据由 DOM 处理时，替代方案为使用非受控组件。
+
+要编写一个非受控组件，而非为每个状态更新编写事件处理程序，React提供了`ref`机制可以从DOM获取表单值。Refs提供了一种方式，用于访问在 render 方法中创建的 DOM 节点或 React 元素。
+
+`ref`是一个React组件的属性，所有React组件都具有这个属性。其值为一个函数对象，该函数对象被调用时携带一个`ref`对象。通过该对象可以直接操作DOM中的节点。
+
+例如，`input`标签在`type`为`file`时，其`value`操作为只读。这种情况下，我们只能使用为受控组件机制进行获取其内容。
+
+
+```
+import React, { Component } from 'react';
+
+
+export default class App extends Component {
+
+  render() {
+    return (
+        <div>
+          <input 
+            type={'file'} 
+            ref={input=>this.fileInput = input}
+          />
+          <button
+            onClick={async()=>{
+              //通过ref对象操作DOM节点
+              const file = this.fileInput.files[0];
+              console.log(file);
+            }}
+          >打印文件</button>
+        </div>
+    );
+  }
+}
+
+```
+
+
+
 
 
 
