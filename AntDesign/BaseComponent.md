@@ -677,109 +677,49 @@ export default class App extends Component {
 {username: "18612341234", password: "xxx"}
 ```
 
-### Radio 单选框
+### DatePickerView 时间选择器
 
-WebApp中的单选框和传统Web中的样式不一样，因WebApp中主要使用手指进行触控操作，而传统Web中是使用鼠标进行操作。所以传统Web中的小圆点不在适用于WebApp。
+在移动WebApp中，尽量避免让用户输入内容，范式化的内容可以用选择器让用户选择代替输入。
 
-一个简单的多选页面如下：
+时间选择器便是一个代表组件，使用该组件可以减少用户对时间数据的输入操作。
 
-![39.png](../images/39.png)
 
-AntDesign框架采用 `RadioItem`组件实现单选操作，其组件API如下：
+组件API：
 
 |属性|说明|类型|默认值|
 |:---|:---|:---|
-|name	|name|	String|	无|
-|checked|	指定当前是否选中|	Boolean	|无|
-|onChange	|change |事件触发的回调函数|	(e: Object): void	|无|
+|mode	|日期选择的类型	|String|	date|
+|value|	当前选中时间|	Date|	无|
+|minDate|	最小可选日期|	Date|	2000-1-1|
+|maxDate|	最大可选日期|	Date	|2030-1-1
+|use12Hours|	12小时制|	Boolean|	false|
+|minuteStep	|分钟数递增步长设置|	Number|	1|
+|onChange|	时间发生变化的回调函数|	(date: Object): void|	-|
 
+该组件的`mode`有如下值可选：
+
+* `datetime`选择内容为年、月、日、时、分，。此类型为默认
+* `date`选择日期，选择内容为年、月、日
+* `time`选择时间，选择内容为时、分
+* `year`选择年份
+* `month`选择月份
+
+基本用法：
 
 ```
 import React, { Component } from 'react';
 
-import { Button,Radio,List} from 'antd-mobile';
-
-const RadioItem = Radio.RadioItem;
+import { Button,List,DatePickerView} from 'antd-mobile';
 
 export default class App extends Component {
 
   constructor(props) {
     super(props)
   
+    const date = new Date();
+    
     this.state = {
-      checked:0
-    }
-  }
-  
-
-
-  render() {
-    return (
-        <div>
-          <h1>单选框</h1>
-          <br/>
-          <List>
-            <RadioItem
-              key={0}
-              checked={0===this.state.checked}
-              onChange={()=>{this.setState({checked:0})}}
-            >x1</RadioItem>
-            <RadioItem
-              key={1}
-              checked={1===this.state.checked}
-              onChange={()=>{this.setState({checked:1})}}
-            >x2</RadioItem>
-          </List>
-          <br/>
-          <Button
-            type={'primary'}
-            onClick={()=>{
-              //模拟登陆
-              console.log(this.state.checked)
-            }}
-          >输出选择结果</Button>
-        </div>
-    );
-  }
-}
-```
-
-对于动态单选框，可以参考如下代码进行实现：
-
-```
-import React, { Component } from 'react';
-
-import { Button,Radio,List} from 'antd-mobile';
-
-const RadioItem = Radio.RadioItem;
-
-//单选选项数据
-const radioDatas = [
-  {
-    id:0,
-    title:'A'
-  },
-  {
-    id:1,
-    title:'B'
-  },
-  {
-    id:2,
-    title:'C'
-  },
-  {
-    id:3,
-    title:'D'
-  },
-]
-
-export default class App extends Component {
-
-  constructor(props) {
-    super(props)
-  
-    this.state = {
-      checked:0
+      date
     }
   }
   
@@ -787,43 +727,35 @@ export default class App extends Component {
 
   render() {
 
-    //通过循环使用单选数据构造RadioItem数组
-    const radioItems = [];
-    for(let i = 0;i<radioDatas.length;i++){
-      const radioData = radioDatas[i];
-      const radioItem = (
-        <RadioItem
-          key={radioData.id}
-          checked={radioData.id === this.state.checked}
-          onChange={()=>{this.setState({checked:radioData.id})}}
-        >
-          {radioData.title}
-        </RadioItem>
-      )
-      radioItems.push(radioItem);
-    }
 
     return (
         <div>
-          <h1>单选框</h1>
+          <h1>日期选择器</h1>
           <br/>
-          <List>
-            {radioItems}
-          </List>
+          <DatePickerView
+            value={this.state.date}
+            onChange={(date)=>{this.setState({date})}}
+          />
           <br/>
           <Button
             type={'primary'}
             onClick={()=>{
               //模拟登陆
-              console.log(this.state.checked)
+              console.log(this.state.date)
             }}
           >输出选择结果</Button>
         </div>
     );
   }
 }
+
 ```
 
-运行结果为：
+运行效果：
 
-![40.png](../images/40.png)
+![42.png](../images/42.png)
+
+
+
+
+
