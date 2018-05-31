@@ -509,6 +509,7 @@ export default class App extends Component {
 
 >在编写代码中，通常使用`e`来代替`event`
 
+# //TODO重点说明`stopPropagation()`和`preventDefault()`作用
 
 React标准化了事件，使其在不同的浏览器中拥有一致的属性。
 
