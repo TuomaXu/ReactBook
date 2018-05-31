@@ -929,3 +929,5 @@ export default class App extends Component {
 ### 逻辑控制层
 
 在使用MVC模式封装实现数据服务层和视图展示层之后，App的应用逻辑需要通过逻辑控制层对象进行实现。
+
+//TODO
