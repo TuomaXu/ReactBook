@@ -16,7 +16,7 @@
 2，在[http://nodejs.cn/download/](http://nodejs.cn/download/)下载最新的node安装包，然后进行双击安装。
 >安装过程中需要关闭杀毒软件和安全工具。
 
-3，在[https://yarn.bootcss.com/docs/install.html#windows-tab]下载最新的yarn安装包，然后进行双击安装。
+3，在[https://yarn.bootcss.com/docs/install.html#windows-tab](https://yarn.bootcss.com/docs/install.html#windows-tab)下载最新的yarn安装包，然后进行双击安装。
 
 4，通过npm工具全局安装`create-react-app`工具。
 >npm工具再安装node时会自动安装

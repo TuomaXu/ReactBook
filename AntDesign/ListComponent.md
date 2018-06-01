@@ -556,7 +556,7 @@ export default class App extends Component {
 
     return (
         <div>
-          <h1>单选框</h1>
+          <h1>复选框选框</h1>
           <br/>
           <List>
             {radioItems}
@@ -575,3 +575,4 @@ export default class App extends Component {
 }
 
 ```
+
