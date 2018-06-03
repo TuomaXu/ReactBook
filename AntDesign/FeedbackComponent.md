@@ -216,3 +216,379 @@ export default class App extends Component {
 * 操作按钮最多到 3 个（竖排），一般为 1-2 个（横排）；3 个以上建议使用组件 ActionSheet 来完成。
 * 一般将用户最可能点击的按钮，放在右侧。另外，取消按钮应当始终放在左侧。
 
+
+Modal对话框提供了三种默认样式：
+
+* `Modal.alert`，模态信息提示框
+* `Modal.prompt`，带输入内容的信息提示框
+* `Modal.operation`，操作选择提示框
+
+使用`Modal.alert`展现如下：
+
+![58.png](../images/58.png)
+
+通过配置其API，可以调整标题、内容和按钮的响应事件
+
+|属性|	说明|	类型	|默认值|
+|:---|:---|:---|:---|
+|title|	标题	|String 或 React.Element	|无|
+|message|	提示信息|	String 或 React.Element|	无|
+|actions|	按钮组, |{text, onPress, style}	|Array|	无|
+
+使用参考代码：
+
+```
+import React, { Component } from 'react';
+
+import {Modal,Toast, Icon,WhiteSpace,Button,List,Carousel,Card,WingBlank,Grid,NoticeBar,Tag} from 'antd-mobile';
+
+
+export default class App extends Component {
+
+  render() {
+
+    return (
+        <div>
+          <h1>{'Modal 对话框'}</h1>
+          <WhiteSpace size="lg" />
+          <WingBlank>
+            <WhiteSpace />
+            <Button 
+              onClick={()=>{
+                Modal.alert(
+                  '标题', 
+                  '消息内容', 
+                  [
+                    {
+                      text:'取消',
+                      onPress:()=>{
+                        console.log('点击取消按钮');
+                        Toast.info('点击取消按钮');
+                      }
+                    },
+                    {
+                      text:'确认',
+                      onPress:()=>{
+                        console.log('点击确认按钮')
+                        Toast.info('点击确认按钮');
+                      }
+                    },
+                  ]
+                )
+              }}
+            >
+              开启提示框
+            </Button>
+          </WingBlank>
+        </div>
+    );
+  }
+}
+
+```
+
+提示框支持1到n个按钮展示，通过配置`actions`属性即可实现：
+
+![59.png](../images/59.png)
+![60.png](../images/60.png)
+
+
+使用`Modal.prompt`基本展示效果如下：
+
+![61.png](../images/61.png)
+
+API列表为：
+
+|属性|	说明|	类型	|默认值|
+|:---|:---|:---|:---|
+|title|	标题	|String 或 React.Element	|无|
+|message|	提示信息|	String 或 React.Element|	无|
+|actions|	按钮组, |{text, onPress, style}	|Array|	无|
+|type	|prompt 的样式	|String (default, secure-text, login-password)|	default|
+
+在配置按钮回调的`onPress`函数时，该函数会携带一个参数，该参数存储用户的输入内容。如在`login-password`模式下，函数携带两个参数，第一个参数为用户名，第二个参数为密码。
+
+上图的实现代码为：
+
+```
+import React, { Component } from 'react';
+
+import {Modal,Toast, Icon,WhiteSpace,Button,List,Carousel,Card,WingBlank,Grid,NoticeBar,Tag} from 'antd-mobile';
+
+
+export default class App extends Component {
+
+  render() {
+
+    return (
+        <div>
+          <h1>{'Modal 对话框'}</h1>
+          <WhiteSpace size="lg" />
+          <WingBlank>
+            <WhiteSpace />
+            <Button 
+              onClick={()=>{
+                Modal.prompt(
+                  '标题', 
+                  '内容', 
+                  [
+                    {
+                      text:'取消',
+                    },
+                    {
+                      text:'确认',
+                      onPress:(value)=>{
+                        Toast.info(`输入内容为：${value}`);
+                      }
+                    }
+                  ]
+                )
+              }}
+            >
+              开启提示框
+            </Button>
+          </WingBlank>
+        </div>
+    );
+  }
+}
+
+```
+
+
+`Modal.operation`为操作选择提示框，没有标题和内容，只有要执行的操作。
+
+![62.png](../images/62.png)
+
+其API只有一个属性：
+
+|属性|	说明|	类型	|默认值|
+|:---|:---|:---|:---|
+|actions|	按钮组, |{text, onPress, style}	|Array|	无|
+
+实现代码：
+
+```
+import React, { Component } from 'react';
+
+import {Modal,Toast, Icon,WhiteSpace,Button,List,Carousel,Card,WingBlank,Grid,NoticeBar,Tag} from 'antd-mobile';
+
+
+export default class App extends Component {
+
+  render() {
+
+    return (
+        <div>
+          <h1>{'Modal 对话框'}</h1>
+          <WhiteSpace size="lg" />
+          <WingBlank>
+            <WhiteSpace />
+            <Button 
+              onClick={()=>{
+                Modal.operation(
+                  [
+                    {
+                      text:'操作1',
+                      onPress:()=>{
+                        Toast.info('选择操作1')
+                      }
+                    },
+                    {
+                      text:'操作2',
+                      onPress:()=>{
+                        Toast.info('选择操作2')
+                      }
+                    }
+                  ]
+                )
+              }}
+            >
+              开启提示框
+            </Button>
+          </WingBlank>
+        </div>
+    );
+  }
+}
+
+```
+
+### ActionSheet 动作面板
+
+从底部弹出的模态框，提供和当前场景相关的 2 个以上的操作动作，也支持提供标题和描述。内置固定的展示样式、不支持特别灵活的修改。
+
+# 默认规则
+
+* 提供清晰的退出按钮。
+* 可高亮破坏性操作，e.g. 将『删除』处理成红色文本。
+* 不要放置过多内容，避免面板纵向滚动。
+
+动作面板提供两种静态API接口：
+
+操作选择列表展示：`static showActionSheetWithOptions(options: Object, callback: Function)`
+
+* `options (array of strings) `- 按钮标题列表 (required)
+* `cancelButtonIndex (int)` - 按钮列表中取消按钮的索引位置
+* `destructiveButtonIndex (int)` - 按钮列表中破坏性按钮（一般为删除）的索引位置
+* `title (string)` - 顶部标题
+* `message (string/React.element)` - 顶部标题下的简要消息
+* `maskClosable (bool)` - 点击蒙层是否允许关闭，默认允许
+
+回调函数中携带一个参数，储存被点击的按钮索引值。
+
+
+展示实例：
+
+![63.png](../images/63.png)
+
+实现代码：
+
+```
+import React, { Component } from 'react';
+
+import {ActionSheet,Modal,Toast, Icon,WhiteSpace,Button,List,Carousel,Card,WingBlank,Grid,NoticeBar,Tag} from 'antd-mobile';
+
+
+export default class App extends Component {
+
+  render() {
+
+    return (
+        <div>
+          <h1>{'ActionSheet 动作面板'}</h1>
+          <WhiteSpace size="lg" />
+          <WingBlank>
+            <WhiteSpace />
+            <Button 
+              onClick={()=>{
+                ActionSheet.showActionSheetWithOptions(
+                  {
+                    title:'选择图片',
+                    options:[
+                      '图片库',
+                      '相机',
+                      '取消'
+                    ],
+                    cancelButtonIndex:2,
+                  },
+                  (buttonIndex)=>{
+                    Toast.info(`点击按钮索引值为：${buttonIndex}`);
+                  }
+                )
+              }}
+            >
+              开启动作面板
+            </Button>
+          </WingBlank>
+        </div>
+    );
+  }
+}
+
+```
+
+
+分享选择展示：`static showShareActionSheetWithOptions(options: Object, callback: Function) `
+
+* `options (array of {icon: ReactNode, title: string})` - 分享按钮列表 (required)
+* `cancelButtonText (string)` - 取消按钮文案，默认为取消
+* `title (string)` - 顶部标题
+* `message (string/React.element)` - 顶部标题下的简要消息
+
+>`options`可以是二维数组，能显示多行按钮，例如`[[{icon,title},...],...]`表示两行两列。当为二维数组时callback有两个参数，第一个为列序列、第二个为行序列。
+
+
+![64.png](../images/64.png)
+
+实现代码：
+
+```
+import React, { Component } from 'react';
+
+import {ActionSheet,Modal,Toast, Icon,WhiteSpace,Button,List,Carousel,Card,WingBlank,Grid,NoticeBar,Tag} from 'antd-mobile';
+
+
+export default class App extends Component {
+
+  render() {
+
+    return (
+        <div>
+          <h1>{'ActionSheet 动作面板'}</h1>
+          <WhiteSpace size="lg" />
+          <WingBlank>
+            <WhiteSpace />
+            <Button 
+              onClick={()=>{
+                ActionSheet.showShareActionSheetWithOptions(
+                  {
+                    title:'分享',
+                    options:[
+                      {
+                        title: '发送给朋友',
+                        icon: (
+                          <img 
+                            src={`https://gw.alipayobjects.com/zos/rmsportal/OpHiXAcYzmPQHcdlLFrc.png`} 
+                            alt={'发送给朋友'} 
+                            style={{ width: 36 }} 
+                          />
+                        ),
+                      },
+                      {
+                        title: '新浪微博',
+                        icon: (
+                          <img 
+                            src={`https://gw.alipayobjects.com/zos/rmsportal/wvEzCMiDZjthhAOcwTOu.png`} 
+                            alt={'新浪微博'} 
+                            style={{ width: 36 }} 
+                          />
+                        ),
+                      },
+                      {
+                        title: '生活圈',
+                        icon: (
+                          <img 
+                            src={`https://gw.alipayobjects.com/zos/rmsportal/cTTayShKtEIdQVEMuiWt.png`} 
+                            alt={'生活圈'} 
+                            style={{ width: 36 }} 
+                          />
+                        ),
+                      },
+                      {
+                        title: '微信好友',
+                        icon: (
+                          <img 
+                            src={`https://gw.alipayobjects.com/zos/rmsportal/umnHwvEgSyQtXlZjNJTt.png`} 
+                            alt={'微信好友'} 
+                            style={{ width: 36 }} 
+                          />
+                        ),
+                      },
+                      {
+                        title: 'QQ',
+                        icon: (
+                          <img 
+                            src={`https://gw.alipayobjects.com/zos/rmsportal/SxpunpETIwdxNjcJamwB.png`} 
+                            alt={'QQ'} 
+                            style={{ width: 36 }} 
+                          />
+                        ),
+                      },
+                    ],
+                  },
+                  (buttonIndex)=>{
+                    Toast.info(`点击按钮索引值为：${buttonIndex}`);
+                  }
+                )
+              }}
+            >
+              开启动作面板
+            </Button>
+          </WingBlank>
+        </div>
+    );
+  }
+}
+
+```
