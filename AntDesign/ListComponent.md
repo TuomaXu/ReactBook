@@ -17,7 +17,7 @@
 `List`API只有两个属性：
 
 |属性|说明|类型|默认值|
-|:---|:---|:---|
+|:---|:---|:---|:---|
 |renderHeader|	list heder|	(): string|	无|
 |renderFooter|	list footer|(): string|	无|
 
@@ -36,7 +36,7 @@
 `List.Item`为`List`组件自带的内容显示组件，其提供了丰富的可配置API，可以展示多种信息：
 
 |属性|说明|类型|默认值|
-|:---|:---|:---|
+|:---|:---|:---|:---|
 |thumb	|缩略图(当为 string 类型时作为 img src)|	String/React.Element|	无|
 |extra|	右边内容|	String/React.Element|	无|
 |arrow|	箭头方向(右,上,下), 可选horizontal,up,down,empty，如果是empty则存在对应的dom,但是不显示|	String	|无|
