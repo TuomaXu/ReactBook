@@ -23,7 +23,7 @@
     * [综合实战3-留言板App](ScreenNavigation/MessageBoardApp.md)
 * [产品实战-FriendSpace](FriendSpace.md)
     * [产品需求分析](FriendSpace/ProductAnalysis.md)
-    * [产品数据设计](FriendSpace/DataStructure)
+    * [产品数据设计](FriendSpace/DataStructure.md)
     * [API接口设计](FriendSpace/APIDoc.md)
     * [App数据服务对象设计与实现](FriendSpace/Manager.md)
     * [登录注册模块](FriendSpace/LoginModule.md)
