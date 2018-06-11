@@ -626,7 +626,7 @@ async getTodos(){
 
 根据产品原型构建Screen对象并在`App`组件中构建导航路径。
 
-构造一下Screen对象：
+构造以下Screen对象：
 
 * `LoginScreen`
 * `RegisterScreen`
