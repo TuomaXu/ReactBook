@@ -178,7 +178,7 @@
 |access_token|登录令牌|
 |title|消息标题|
 |content|消息内容|
-|image1-9|图片Base64链接|
+|image1-9|图片file对象|
 
 返回值：
 
