@@ -930,4 +930,213 @@ export default class App extends Component {
 
 在使用MVC模式封装实现数据服务层和视图展示层之后，App的应用逻辑需要通过逻辑控制层对象进行实现。
 
-//TODO
+逻辑控制器主要由Screen对象实现，完成以下内容：
+
+* 在`render()`中配置页面展现形式
+* 在组件中响应控件事件
+* 在事件处理中使用数据服务对象操作数据
+
+例如登录模块，使用LoginScreen控制器进行实现：
+
+首先构造一个封装登录操作的Manager对象：
+
+```
+import { loginURL,registerURL } from './URLConfig';
+
+class UserManager {
+    
+    async login(username,password){
+        try {
+            const user = {
+                username,
+                password
+            }
+
+            const res = await fetch(loginURL,{
+                method:'POST',
+                headers:{
+                    'Accept':'application/json',
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify(user)
+            });
+
+            const result = await res.json();
+
+            if(result.success === true){
+                localStorage.access_token = result.data.access_token 
+            }
+
+            return result;
+
+        } catch (error) {
+            return {
+                success:false,
+                errorMessage:'网络错误'
+            }
+        }
+    }
+
+    logout(){
+        localStorage.access_token = '';
+    }
+
+    isLogin(){
+        if(localStorage.access_token === '' || !localStorage.access_token){
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    async register(username,password){
+        try {
+            const user = {
+                username,
+                password
+            }
+
+            const res = await fetch(registerURL,{
+                method:'POST',
+                headers:{
+                    'Accept':'application/json',
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify(user)
+            });
+
+            const result = await res.json();
+
+            if(result.success === true){
+                localStorage.access_token = result.data.access_token 
+            }
+
+            return result;
+
+        } catch (error) {
+            return {
+                success:false,
+                errorMessage:'网络错误'
+            }
+        }
+    }
+
+}
+
+export default new UserManager();
+```
+
+在LoginScreen使用布局页面展示效果：
+
+![98.png](../images/98.png)
+
+代码实现步骤：
+
+1，构建基本的Screen模板
+
+```
+import React, { Component } from 'react'
+
+import { 
+    Button,
+    Toast,
+    NavBar,
+    WingBlank, 
+    WhiteSpace ,
+    List,
+    InputItem,
+} from 'antd-mobile';
+
+import userManager from '../DataServer/UserManager';
+
+
+
+export default class LoginScreen extends Component {
+
+    constructor(props) {
+      super(props)
+    
+      this.state = {
+         username:'',
+         password:''
+      }
+    }
+    
+
+    
+
+    render() {
+        return (
+            <div>
+            <NavBar
+                mode="dark"
+            >登录</NavBar>
+            <WhiteSpace/>
+            <List>
+                <InputItem
+                    type={'text'}
+                    value={this.state.username}
+                    onChange={(username)=>{this.setState({username})}}
+                    placeholder={'请输入登录用户名'}
+                >
+                    用户名
+                </InputItem>
+                <InputItem
+                    type={'password'}
+                    value={this.state.password}
+                    onChange={(password)=>{this.setState({password})}}
+                    placeholder={'请输入登录密码'}
+                >
+                    密码
+                </InputItem>
+            </List>
+            <WhiteSpace/>
+            <WingBlank>
+                <Button
+                    type={'primary'}
+                    onClick={this.onLoginClick}
+                >
+                    登录
+                </Button>
+                <WhiteSpace/>
+                <Button
+                    type={'primary'}
+                    onClick={this.onRegisterClick}
+                >
+                    注册
+                </Button>
+            </WingBlank>
+            </div>
+        )
+    }
+
+    onLoginClick = async ()=>{
+
+    }
+
+    onRegisterClick = ()=>{
+
+    }
+}
+
+```
+
+2，添加事件处理函数：
+
+在事件处理函数中，使用数据服务对象操作输入，然后使用响应组件对操作结果进行展示。
+
+```
+onLoginClick = async ()=>{
+    const reslut = await userManager.login(this.state.username,this.state.password);
+    if(reslut.success === false){
+        Toast.fail(reslut.errorMessage);
+        return;
+    }
+    this.props.history.replace('/HomeScreen');
+}
+
+onRegisterClick = ()=>{
+    this.props.history.push('/RegisterScreen')
+}
+```
+
