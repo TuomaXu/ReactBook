@@ -307,7 +307,6 @@ class MeetingManager {
                 name,
                 tel
             }
-
             const res = await fetch(registerURL,{
                 method:'POST',
                 headers:{
@@ -316,9 +315,7 @@ class MeetingManager {
                 },
                 body:JSON.stringify(person)
             })
-
             const result = await res.json();
-
             return result;
         } catch (error){
             return {
@@ -689,6 +686,71 @@ const styles = {
     top: 0
   }
 }
+```
+
+在`index.js`中配置路由容器：
+
+```
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
+import registerServiceWorker from './registerServiceWorker';
+
+import {
+    MemoryRouter
+  } from 'react-router-dom'
+
+
+ReactDOM.render(
+<MemoryRouter>
+    <App />
+</MemoryRouter>
+,document.getElementById('root'));
+registerServiceWorker();
+
+```
+
+在`App.js`中配置导航路由：
+
+```
+import React, { Component } from 'react';
+
+import DocumentTitle from 'react-document-title';
+
+import {
+  Route
+} from 'react-router-dom'
+
+
+import TabbarScreen from './Screen/TabBarScreen';
+import RegisterMeetingScreen from './Screen/RegisterMeetingScreen';
+import UnRegisterMeetingScreen from './Screen/UnRegisterMeetingScreen';
+import QuaryTotalScreen from './Screen/QuaryTotalScreen';
+import CheckPersonListScreen from './Screen/CheckedPersonListScreen';
+import UnCheckPersonListScreen from './Screen/UnCheckPersonListScreen';
+import QuaryPersonStateScreen from './Screen/QuaryPersonStateScreen'
+
+class App extends Component {
+  render() {
+    return (
+      <DocumentTitle title='会场登记管理系统'>
+        <div>
+          <Route exact path={'/'} component={TabbarScreen} />
+          <Route path={'/RegisterMeetingScreen'} component={RegisterMeetingScreen} />
+          <Route path={'/UnRegisterMeetingScreen'} component={UnRegisterMeetingScreen} />
+          <Route path={'/QuaryTotalScreen'} component={QuaryTotalScreen} />
+          <Route path={'/CheckPersonListScreen'} component={CheckPersonListScreen} />
+          <Route path={'/UnCheckPersonListScreen'} component={UnCheckPersonListScreen} />
+          <Route path={'/QuaryPersonStateScreen'} component={QuaryPersonStateScreen} />
+        </div>
+      </DocumentTitle>
+    );
+  }
+}
+
+export default App;
+
 ```
 
 ### Screen实现
@@ -1169,6 +1231,76 @@ export default class QuaryScreen extends Component {
 }
 ```
 
+完整实现代码：
+
+```
+import React, { Component } from 'react'
+
+import { 
+    Button,
+    WingBlank, 
+    WhiteSpace,
+    NavBar 
+ } from 'antd-mobile';
+
+export default class QuaryScreen extends Component {
+  render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+        >
+            查询模块
+        </NavBar>
+        <WhiteSpace/>
+        <WingBlank>
+            <Button
+                type='primary'
+                onClick={()=>{
+                    //跳转到查询统计信息Screen
+                    this.props.history.push('/QuaryTotalScreen');
+                }}
+            >
+                查询统计信息
+            </Button>
+            <WhiteSpace/>
+            <Button
+                type='primary'
+                onClick={()=>{
+                    //跳转到已签到名单Screen  
+                    this.props.history.push('/CheckPersonListScreen');
+                }}
+            >
+                查询已签到名单
+            </Button>
+            <WhiteSpace/>
+            <Button
+                type='primary'
+                onClick={()=>{
+                    //跳转到未签到名单Screen  
+                    this.props.history.push('/UnCheckPersonListScreen');
+                }}
+            >
+                查询未签到名单
+            </Button>
+            <WhiteSpace/>
+            <Button
+                type='primary'
+                onClick={()=>{
+                    //跳转到个人签到状态Screen  QuaryPersonStateScreen
+                    this.props.history.push('/QuaryPersonStateScreen');
+                }}
+            >
+                查询个人签到状态
+            </Button>
+        </WingBlank>
+      </div>
+    )
+  }
+}
+
+```
+
 **参会登记 RegisterMeetingScreen**
 
 在此页面中，允许用户输入名字和电话，然后点击提交登记按钮将信息发送到服务器进行登记，然后返回此用户对应的登记号。
@@ -1311,7 +1443,92 @@ registerUser = async()=>{
     提交登记
 </Button>
 ```
+完整实现代码：
 
+```
+import React, { Component } from 'react'
+
+import { 
+    Button,
+    WingBlank, 
+    WhiteSpace,
+    NavBar,
+    List,
+    InputItem ,
+    Icon,
+    Modal,
+ } from 'antd-mobile';
+
+
+ import meetingManager from '../DataServe/MeetingManager';
+
+export default class RegisterMeetingScreen extends Component {
+
+    constructor(props) {
+      super(props)
+    
+      this.state = {
+         name:'',
+         tel:''
+      }
+    }
+    
+  render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+            onLeftClick={() =>{
+                this.props.history.goBack();
+            }}
+        >
+            参会登记
+        </NavBar>
+        <WhiteSpace/>
+        <List>
+            <InputItem 
+                value={this.state.name}
+                onChange={(name)=>{ this.setState({name})}}
+            >
+                参会者姓名：
+            </InputItem >
+            <WhiteSpace/>
+            <InputItem 
+                value={this.state.tel}
+                onChange={(tel)=>{ this.setState({tel})}}
+            >
+                参会者电话：
+            </InputItem >
+        </List>
+        <WhiteSpace/>
+        <WingBlank>
+            <Button
+                type='primary'
+                onClick={this.registerUser}
+            >
+                提交登记
+            </Button>
+        </WingBlank>
+      </div>
+    )
+  }
+
+  registerUser = async()=>{
+    try {
+        const result = await meetingManager.register(this.state.name,this.state.tel);
+        if (result.success === false) {
+            Modal.alert('错误',result.errorMessage)
+            return;
+        }
+        Modal.alert('登记成功','登记号为：'+result.data.id)
+    } catch (error) {
+        Modal.alert('错误',`${error}`);
+    }
+  }
+}
+
+```
 
 **取消登记  UnRegisterMeetingScreen**
 
@@ -1441,6 +1658,83 @@ removeUser = async ()=>{
 </Button>
 ```
 
+完整实现代码：
+
+```
+import React, { Component } from 'react'
+
+import { 
+    Button,
+    WingBlank, 
+    WhiteSpace,
+    NavBar,
+    List,
+    InputItem ,
+    Icon,
+    Modal
+ } from 'antd-mobile';
+
+ import meetingManager from '../DataServe/MeetingManager';
+
+export default class UnRegisterMeetingScreen extends Component {
+
+    constructor(props) {
+      super(props)
+    
+      this.state = {
+         rid:''
+      }
+    }
+    
+  render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+            onLeftClick={() =>{
+                this.props.history.goBack();
+            }}
+        >
+            取消参会登记
+        </NavBar>
+        <WhiteSpace/>
+        <List>
+            <InputItem 
+                value={this.state.rid}
+                onChange={(rid)=>{ this.setState({rid})}}
+            >
+                登记号：
+            </InputItem >
+        </List>
+        <WhiteSpace/>
+        <WingBlank>
+            <Button
+                type='primary'
+                onClick={this.removeUser}
+            >
+                取消登记
+            </Button>
+        </WingBlank>
+      </div>
+    )
+  }
+
+  removeUser = async ()=>{
+    try {
+        const result = await meetingManager.unRegister(this.state.rid);
+        if (result.success === false) {  
+            Modal.alert('错误',result.errorMessage)
+            return;
+        }
+        Modal.alert('取消登记成功')
+    } catch (error) {
+        Modal.alert('错误',`${error}`);
+    }
+  }
+}
+
+```
 
 **查询统计信息 QuaryTotalScreen**
 
@@ -1547,7 +1841,75 @@ async componentDidMount(){
 }
 ```
 
-//修改到这里！！！！
+完整实现代码：
+
+```
+import React, { Component } from 'react'
+
+import { 
+    NavBar,
+    List,
+    Icon,
+    Modal
+ } from 'antd-mobile';
+
+ import meetingManager from '../DataServe/MeetingManager';
+
+export default class QuaryTotalScreen extends Component {
+
+    constructor(props) {
+      super(props)
+    
+      this.state = {
+         total:'',
+         unChecked:'',
+         checked:''
+      }
+    }
+
+    async componentDidMount(){
+        try {
+            const result = await meetingManager.chaxuTongji();
+            if (result.success === false) {   
+                Modal.alert('错误',result.errorMessage)
+                return;
+            }
+            this.setState(result.data)
+        } catch (error) {
+            Modal.alert('错误',`${error}`);
+        }
+    }
+    
+
+  render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+            onLeftClick={() =>{
+                this.props.history.goBack();
+            }}
+        >
+            登记统计信息
+        </NavBar>
+        <List>
+            <List.Item>
+                {`总登记人数为：${this.state.total}`}
+            </List.Item>
+            <List.Item>
+                {`已签到人数为：${this.state.checked}`}
+            </List.Item>
+            <List.Item>
+                {`未签到人数为：${this.state.unChecked}`}
+            </List.Item>
+        </List>
+      </div>
+    )
+  }
+}
+
+```
 
 **已签到名单  CheckPersonListScreen**
 
@@ -1555,15 +1917,201 @@ async componentDidMount(){
 
 1，构建文件模板，引入相关依赖，配置state初始状态
 
+```
+import React, { Component } from 'react'
+
+import { 
+    NavBar,
+    List,
+    Icon,
+    ListView,
+    Modal
+ } from 'antd-mobile';
+
+import meetingManager from '../DataServe/MeetingManager';
+
+export default class CheckPersonListScreen extends Component {
+
+    constructor(props) {
+      super(props)
+      //使用ListView显示数据时，首先需要构造ListView的数据源服务对象dataSource
+      //构建方式如下
+      const dataSource  = new ListView.DataSource({
+          rowHasChanged: (r1, r2) => r1 !== r2
+        });
+      //将DataSource对象放入state中
+      this.state = {
+        dataSource,
+      };
+    }
+}
+
+```
+
 2，在`render()`函数中构建页面元素
 
-3，为受控组件配置受控状态
+```
+render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+        >
+            已签到名单
+        </NavBar>
+        <ListView
+            useBodyScroll
+            dataSource={this.state.dataSource}
+        />
+      </div>
+    )
+  }
+```
+
+3，配置ListView的`renderRow`函数
+
+```
+renderRow = (person)=>{
+    return(
+        <List.Item
+            extra={'ID:'+person.id}
+        >
+            {'姓名：'+person.name}
+            <List.Item.Brief> 
+                {'电话：'+person.tel} 
+            </List.Item.Brief>   
+        </List.Item>
+    )
+  }
+```
+
+```
+<ListView
+    useBodyScroll
+    dataSource={this.state.dataSource}
+    renderRow={this.renderRow}
+/>
+```
 
 4，为页面添加响应事件
 
+```
+<NavBar
+    mode="dark"
+    icon={<Icon type="left" />}
+    onLeftClick={() =>{
+        this.props.history.goBack();
+    }}
+>
+```
+
 5，配置页面声明周期函数
 
+```
+async componentDidMount(){
+    try {
+        const result = await meetingManager.yiqiandao();
+        if (result.success === false) {  
+            Modal.alert('错误',result.errorMessage)
+            return;
+        }
+        this.setState((preState)=>{
+            return{
+                dataSource:preState.dataSource.cloneWithRows(result.data),
+            }
+        })
+    } catch (error) {
+        Modal.alert('错误',`${error}`);
+    }    
+}
+```
 
+完整实现代码：
+
+```
+import React, { Component } from 'react'
+
+import { 
+    NavBar,
+    List,
+    Icon,
+    ListView,
+    Modal
+ } from 'antd-mobile';
+
+import meetingManager from '../DataServe/MeetingManager';
+
+export default class CheckPersonListScreen extends Component {
+
+    constructor(props) {
+      super(props)
+
+      //使用ListView显示数据时，首先需要构造ListView的数据源服务对象dataSource
+      //构建方式如下
+      const dataSource  = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+      //将DataSource对象放入state中
+      this.state = {
+        dataSource,
+      };
+
+
+    }
+
+    async componentDidMount(){
+        try {
+            const result = await meetingManager.yiqiandao();
+            if (result.success === false) {  
+                Modal.alert('错误',result.errorMessage)
+                return;
+            }
+            this.setState((preState)=>{
+                return{
+                    dataSource:preState.dataSource.cloneWithRows(result.data),
+                }
+            })
+        } catch (error) {
+            Modal.alert('错误',`${error}`);
+        }    
+    }
+    
+
+  render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+            onLeftClick={() =>{
+                this.props.history.goBack();
+            }}
+        >
+            已签到名单
+        </NavBar>
+        <ListView
+            useBodyScroll
+            dataSource={this.state.dataSource}
+            renderRow={this.renderRow}
+        />
+      </div>
+    )
+  }
+
+  renderRow = (person)=>{
+    return(
+        <List.Item
+            extra={'ID:'+person.id}
+        >
+            {'姓名：'+person.name}
+            <List.Item.Brief> 
+                {'电话：'+person.tel} 
+            </List.Item.Brief>   
+        </List.Item>
+    )
+  }
+}
+
+```
 
 **未签到名单 UnCheckPersonListScreen**
 
@@ -1571,15 +2119,199 @@ async componentDidMount(){
 
 1，构建文件模板，引入相关依赖，配置state初始状态
 
+```
+import React, { Component } from 'react'
+
+import { 
+    NavBar,
+    List,
+    Icon,
+    ListView,
+    Modal
+ } from 'antd-mobile';
+
+import meetingManager from '../DataServe/MeetingManager';
+
+export default class CheckPersonListScreen extends Component {
+
+    constructor(props) {
+      super(props)
+      //使用ListView显示数据时，首先需要构造ListView的数据源服务对象dataSource
+      //构建方式如下
+      const dataSource  = new ListView.DataSource({
+          rowHasChanged: (r1, r2) => r1 !== r2
+        });
+      //将DataSource对象放入state中
+      this.state = {
+        dataSource,
+      };
+    }
+}
+
+```
+
 2，在`render()`函数中构建页面元素
 
-3，为受控组件配置受控状态
+```
+render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+        >
+            未签到名单
+        </NavBar>
+        <ListView
+            useBodyScroll
+            dataSource={this.state.dataSource}
+        />
+      </div>
+    )
+  }
+```
+
+3，配置ListView的`renderRow`函数
+
+```
+renderRow = (person)=>{
+    return(
+        <List.Item
+            extra={'ID:'+person.id}
+        >
+            {'姓名：'+person.name}
+            <List.Item.Brief> 
+                {'电话：'+person.tel} 
+            </List.Item.Brief>   
+        </List.Item>
+    )
+  }
+```
+
+```
+<ListView
+    useBodyScroll
+    dataSource={this.state.dataSource}
+    renderRow={this.renderRow}
+/>
+```
 
 4，为页面添加响应事件
 
+```
+<NavBar
+    mode="dark"
+    icon={<Icon type="left" />}
+    onLeftClick={() =>{
+        this.props.history.goBack();
+    }}
+>
+```
+
 5，配置页面声明周期函数
 
+```
+async componentDidMount(){
+    try {
+        const result = await meetingManager.weiqiandao();
+        if (result.success === false) {  
+            Modal.alert('错误',result.errorMessage)
+            return;
+        }
+        this.setState((preState)=>{
+            return{
+                dataSource:preState.dataSource.cloneWithRows(result.data),
+            }
+        })
+    } catch (error) {
+        Modal.alert('错误',`${error}`);
+    }    
+}
+```
 
+完整实现代码：
+
+```
+import React, { Component } from 'react'
+
+import { 
+    NavBar,
+    List,
+    Icon,
+    ListView,
+    Modal
+ } from 'antd-mobile';
+
+import meetingManager from '../DataServe/MeetingManager';
+
+export default class UnCheckPersonListScreen extends Component {
+
+    constructor(props) {
+      super(props)
+
+      //使用ListView显示数据时，首先需要构造ListView的数据源服务对象dataSource
+      //构建方式如下
+      const dataSource  = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+      //将DataSource对象放入state中
+      this.state = {
+        dataSource,
+      };
+    }
+
+    async componentDidMount(){
+        try {
+            const result = await meetingManager.weiqiandao();
+            if (result.success === false) {  
+                Modal.alert('错误',result.errorMessage)
+                return;
+            }
+            this.setState((preState)=>{
+                return{
+                    dataSource:preState.dataSource.cloneWithRows(result.data),
+                }
+            })
+        } catch (error) {
+            Modal.alert('错误',`${error}`);
+        }    
+    }
+    
+
+  render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+            onLeftClick={() =>{
+                this.props.history.goBack();
+            }}
+        >
+            未签到名单
+        </NavBar>
+        <ListView
+            useBodyScroll
+            dataSource={this.state.dataSource}
+            renderRow={this.renderRow}
+        />
+      </div>
+    )
+  }
+
+  renderRow = (person)=>{
+    return(
+        <List.Item
+            extra={'ID:'+person.id}
+        >
+            {'姓名：'+person.name}
+            <List.Item.Brief> 
+                {'电话：'+person.tel} 
+            </List.Item.Brief>   
+        </List.Item>
+    )
+  }
+}
+
+```
 
 **查询个人签到状态  QuaryPersonStateScreen**
 
@@ -1587,10 +2319,194 @@ async componentDidMount(){
 
 1，构建文件模板，引入相关依赖，配置state初始状态
 
+```
+import React, { Component } from 'react'
+
+import { 
+    Button,
+    WingBlank, 
+    WhiteSpace,
+    NavBar,
+    List,
+    InputItem ,
+    Icon,
+    Modal
+ } from 'antd-mobile';
+
+import meetingManager from '../DataServe/MeetingManager';
+
+export default class QuaryPersonStateScreen extends Component {
+
+    constructor(props) {
+      super(props)
+    
+      this.state = {
+         rid:''
+      }
+    }
+
+    render(){
+
+    }
+}
+```
+
 2，在`render()`函数中构建页面元素
+
+```
+render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+        >
+            个人签到状态
+        </NavBar>
+        <WhiteSpace/>
+        <List>
+            <InputItem>
+                登记号：
+            </InputItem >
+        </List>
+        <WhiteSpace/>
+        <WingBlank>
+            <Button
+                type='primary'
+            >
+                查询
+            </Button>
+        </WingBlank>
+      </div>
+    )
+  }
+```
 
 3，为受控组件配置受控状态
 
+```
+<InputItem 
+    value={this.state.rid}
+    onChange={(rid)=>{ this.setState({rid})}}
+>
+    登记号：
+</InputItem >
+```
+
 4，为页面添加响应事件
 
-5，配置页面声明周期函数
+导航返回按钮事件：
+
+```
+<NavBar
+    mode="dark"
+    icon={<Icon type="left" />}
+    onLeftClick={() =>{
+        this.props.history.goBack();
+    }}
+>
+    个人签到状态
+</NavBar>
+```
+
+查询按钮事件：
+
+```
+findState = async ()=>{
+    try {
+        const result = await meetingManager.checkPerson(this.state.rid);
+        if(result.success === false){
+            Modal.alert('错误',result.errorMessage)
+            return;
+        }
+        if(result.data.isCheck === 0){
+            Modal.alert('该用户未签到');
+        } else {
+            Modal.alert('该用户已签到');
+        }
+    } catch (error) {
+        Modal.alert('错误',`${error}`);
+    }
+  }
+```
+
+完整实现代码：
+
+```
+import React, { Component } from 'react'
+
+import { 
+    Button,
+    WingBlank, 
+    WhiteSpace,
+    NavBar,
+    List,
+    InputItem ,
+    Icon,
+    Modal
+ } from 'antd-mobile';
+
+import meetingManager from '../DataServe/MeetingManager';
+
+export default class QuaryPersonStateScreen extends Component {
+
+    constructor(props) {
+      super(props)
+    
+      this.state = {
+         rid:''
+      }
+    }
+    
+  render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+            onLeftClick={() =>{
+                this.props.history.goBack();
+            }}
+        >
+            个人签到状态
+        </NavBar>
+        <WhiteSpace/>
+        <List>
+            <InputItem 
+                value={this.state.rid}
+                onChange={(rid)=>{ this.setState({rid})}}
+            >
+                登记号：
+            </InputItem >
+        </List>
+        <WhiteSpace/>
+        <WingBlank>
+            <Button
+                type='primary'
+                onClick={this.findState}
+            >
+                查询
+            </Button>
+        </WingBlank>
+      </div>
+    )
+  }
+
+  findState = async ()=>{
+    try {
+        const result = await meetingManager.checkPerson(this.state.rid);
+        if(result.success === false){
+            Modal.alert('错误',result.errorMessage)
+            return;
+        }
+        if(result.data.isCheck === 0){
+            Modal.alert('该用户未签到');
+        } else {
+            Modal.alert('该用户已签到');
+        }
+    } catch (error) {
+        Modal.alert('错误',`${error}`);
+    }
+  }
+}
+```
