@@ -1,9 +1,5 @@
 # Ant基础组件
 
-### WingBlank两翼留白
-
-
-### WhiteSpace 上下留白
 
 ### Button 按钮
 
@@ -230,10 +226,6 @@ export default class App extends Component {
 
 ![19.png](../images/19.png)
 
-
-### Progress 进度条
-
-//TODO
 
 ### Switch 滑动开关
 

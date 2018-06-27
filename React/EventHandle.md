@@ -420,8 +420,78 @@ export default class App extends Component {
 }
 ```
 
+### 事件冒泡
 
+在React事件中，与DOM事件具有一致的事件冒泡特性。及一个事件发生后会上上层逐层传递，触发每一层的`onClick`事件接口。
 
+例如下面代码：
+
+```
+import React, { Component } from 'react'
+
+import { Button } from 'antd-mobile'
+
+export default class App2 extends Component {
+  render() {
+    return (
+      <div>
+        <div 
+            style={{width:400,height:400,backgroundColor:'red'}}
+            onClick={()=>{
+                console.log('333');
+            }}
+        >
+            <div 
+                style={{width:200,height:200,backgroundColor:'green'}}
+                onClick={(e)=>{
+                        console.log('222');
+                }}
+            >
+                <Button
+                    type={'primary'}
+                    onClick={(e)=>{
+                        console.log('111');
+                    }}
+                >
+                    xxx1
+                </Button>
+            </div>
+        </div>
+      </div>
+    )
+  }
+}
+
+```
+运行效果为：
+
+![123.png](../images/123.png)
+
+当点击蓝色按钮时，会输出
+
+```
+111
+222
+333
+```
+这是在具有多层交互的页面布局中会出现错误。
+
+React提供了一个停止事件冒泡传递的方法:`stopPropagation()`
+
+在响应事件后，通过事件合成对象调用此方法，事件便不会继续冒泡上传：
+
+```
+<Button
+    type={'primary'}
+    onClick={(e)=>{
+        //阻止事件冒泡传递
+        e.stopPropagation();
+        console.log('111');
+    }}
+>
+    xxx1
+</Button>
+```
 
 ### 非受控组件事件处理
 
@@ -509,7 +579,6 @@ export default class App extends Component {
 
 >在编写代码中，通常使用`e`来代替`event`
 
-# //TODO重点说明`stopPropagation()`和`preventDefault()`作用
 
 React标准化了事件，使其在不同的浏览器中拥有一致的属性。
 

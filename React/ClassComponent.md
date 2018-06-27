@@ -137,7 +137,7 @@ onSomeEvnet(){
 
 ```
 onSomeEvnet(){
-
+    //错误操作！！！
     this.state.a = 1;
 }
 ```

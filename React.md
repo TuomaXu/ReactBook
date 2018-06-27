@@ -14,6 +14,7 @@ React有三个主要的特点：
 
 为什么通过这多一层的Virtual DOM操作就能更快呢？ 这是因为React有个diff算法，更新Virtual DOM并不保证马上影响真实的DOM，React会等到事件循环结束，然后利用这个diff算法，通过当前新的dom表述与之前的作比较，计算出最小的步骤更新真实的DOM。
 
+
 ### 总结
 
 * React不是一个MVC框架，它是构建易于可重复调用的web组件，侧重于UI, 也就是view层

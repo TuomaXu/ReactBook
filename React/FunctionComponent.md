@@ -281,7 +281,7 @@ ReactDOM.render(app,div);
 在使用组件化开发模式时，首先需要确定组件的结构，一般来说，显示同一类的数据的页面结构封装为一个组件。在这样原则下，我们可以将用户头像和用户姓名封装为一个`UserInfo`组件，将评论内容和评论时间封装为一个`Content`组件。然后在使用这两个组件封装一个`Comment`组件。
 
 
-封装`UserInfo`组件
+使用HTML标签构造React元素封装`UserInfo`组件
 
 ```
 function UserInfo(props){
@@ -299,7 +299,7 @@ function UserInfo(props){
 }
 ```
 
-封装`Content`组件
+使用HTML标签构造React元素封装`Content`组件
 
 ```
 function Content(props){
@@ -316,7 +316,7 @@ function Content(props){
 }
 ```
 
-封装`Comment`组件
+使用`UserInfo`组件和`Content`组件封装`Comment`组件：
 
 ```
 function Comment(props){
@@ -339,8 +339,18 @@ function Comment(props){
 
 ```
 <div className="CommentList">
-    <Comment name={'Tom'} avatarUrl={'http://t.cn/R3dIR5P'} text={'这是一条评论xxx'} date={'2018-5-22'}/>
-    <Comment name={'Jhon'} avatarUrl={'http://t.cn/R3dM7xC'} text={'这是一条评论yyy'} date={'2018-5-21'}/>
+    <Comment 
+        name={'Tom'} 
+        avatarUrl={'http://t.cn/R3dIR5P'} 
+        text={'这是一条评论xxx'} 
+        date={'2018-5-22'}
+    />
+    <Comment 
+        name={'Jhon'} 
+        avatarUrl={'http://t.cn/R3dM7xC'} 
+        text={'这是一条评论yyy'} 
+        date={'2018-5-21'}
+    />
 </div>
 ```
 
@@ -521,4 +531,4 @@ ReactDOM.render(
 
 >调试窗口中有一个警告：
 >`Warning: Each child in an array or iterator should have a unique "key" prop.`
->暂且忽略此警告，在后面的表单章节中，在解决这个问题。
+>暂且忽略此警告，在后面的表单章节中，会解决这个问题。
