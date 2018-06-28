@@ -8,9 +8,10 @@
 
 `BrowserRouter`为传统导航容器，按照浏览器地址栏中的相对路径请求响应的服务页面，这样的导航方式并不适合以组件化开发的WebApp。因WebApp的所有页面都在浏览器中，后台仅提供JSON格式的数据。
 
-`HashRouter`适合组件化开发的WebApp导航，其导航为以`#`为地址的相对导航路径，该路径首先在浏览器中进行处理。
+`HashRouter`适合组件化开发的WebApp导航，其导航为以`#`为地址的相对导航路径，该路径首先在浏览器中进行处理。以下案例均以HashRouter为实现。
 
-`MemoryRouter`导航容器无地址变化，适合在无地址栏的场景下使用，例如微信中打开一个页面。以下案例使用该导航容器
+`MemoryRouter`导航容器无地址变化，适合在无地址栏的场景下使用，例如微信中打开一个页面。
+
 
 ### 基础配置
 
@@ -30,7 +31,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 registerServiceWorker();
 ```
 
-在源文件的基础上首先引入`ReactRouter`中的`MemoryRouter`组件：
+在源文件的基础上首先引入`ReactRouter`中的`HashRouter`组件：
 
 
 
@@ -40,7 +41,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 
-import { MemoryRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 
 import registerServiceWorker from './registerServiceWorker';
 
@@ -48,7 +49,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 registerServiceWorker();
 ```
 
-然后使用`MemoryRouter`对`<App/>`元素进行包裹，这样App组件就有了Screen导航能力：
+然后使用`HashRouter`对`<App/>`元素进行包裹，这样App组件就有了Screen导航能力：
 
 ```
 import React from 'react';
@@ -56,14 +57,14 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 
-import { MemoryRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 
 import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render(
-    <MemoryRouter>
+    <HashRouter>
         <App />
-    </MemoryRouter>, 
+    </HashRouter>, 
     document.getElementById('root')
 );
 registerServiceWorker();
@@ -457,16 +458,23 @@ export default class BScreen extends Component {
 
 ### 页面间传值
 
-ReactRouter允许在页面`push`时携带参数。在地址后面可以再添加一个对象，用来传递参数，
+ReactRouter提供匹配模式进行跳转传值。在定义路由路径是，可以添加`/:`标记为携带的参数，例如：
 
 ```
-this.props.history.push('/AScreen',{name:'tom'})
+<Route
+  path={'/AScreen/:name'}
+  component={AScreen}
+/>
+```
+
+```
+this.props.history.push('/AScreen'+'tom')
 ```
 
 该对象会被展示的组件接收，通过下面代码获取传递的参数
 
 ```
-this.props.history.location.state
+this.props.match.params.name
 ```
 
 
@@ -491,7 +499,7 @@ export default class HomeScreen extends Component {
             type={'primary'}
             onClick={()=>{
                 //跳转到AScreen
-                this.props.history.push('/AScreen',{name:'tom'})
+                this.props.history.push('/AScreen'+'tom')
             }}
         >
             跳转到AScreen
@@ -534,7 +542,7 @@ export default class AScreen extends Component {
         <WhiteSpace/>
         <WhiteSpace/>
         <WhiteSpace/>
-        <p>{this.props.history.location.state.name}</p>
+        <p>{this.props.match.params.name}</p>
         <Button
             type={'primary'}
             onClick={()=>{
