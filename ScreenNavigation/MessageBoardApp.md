@@ -680,6 +680,8 @@ export default new MessageManager();
 
 在`App.js`中引入上述Screen对象，并配置路由。应用的根路径为'/'，在配置根路径对应的Screen对象时，需要对`exact`的值设置为`true`，以保证该路径不和其他保护'/'的路径发生混淆。
 
+因从HomeScreen到CommentScreen的跳转过程需要将所点击的MessageID进行传递，所以在配置CommentScreen路由路径时，需要添加一个`id`参数。`/CommentScreen/:id`。
+
 ```
 import React, { Component } from 'react';
 
@@ -701,8 +703,8 @@ class App extends Component {
         <Route path={'/RegisterScreen'} component={RegisterScreen} />
         <Route path={'/HomeScreen'} component={HomeScreen} />
         <Route path={'/CreateMessageScreen'} component={CreateMessageScreen} />
-        <Route path={'/CommentScreen'} component={CommentScreen} />
-        <Route path={'/CreateCommentScreen'} component={CreateCommentScreen} />
+        <Route path={'/CommentScreen/:id'} component={CommentScreen} />
+        <Route path={'/CreateCommentScreen/:id'} component={CreateCommentScreen} />
       </div>
     );
   }
@@ -711,35 +713,10 @@ class App extends Component {
 export default App;
 ```
 
-### 非登录授权访问拦截
-
-在有登录或授权的机制中，通过浏览器地址栏中访问非授权页面是需要根据当前授权状态判断是否拦截。在本App中，登录注册Screen访问为非授权访问，可以通过地址栏进行直接跳转。但HomeScreen和CreateTodoScreen需要根据登录状态进行拦截操作。
-
-拦截操作通过`this.props.history.replace('/')`，跳转到跟视图。拦截操作在声明周期函数的`componentDidMount()`中进行。
-
-参考代码：
-
-```
-import React, { Component } from 'react'
-
-import userManager from '../DataServer/UserManager';
-
-export default class XXXScreen extends Component {
-
-    componentDidMount(){
-
-        if(!userManager.isLogin()){
-            this.props.history.replace('/');
-            return;
-        }
-    }
-}
-```
-
 
 ### 构建LoginScreen
 
-1，定义组件基本语法结构，引入相关组件。
+1，构建文件模板，引入相关依赖，配置State初值
 
 ```
 import React, { Component } from 'react'
@@ -755,88 +732,6 @@ import {
 } from 'antd-mobile';
 
 import userManager from '../DataServer/UserManager';
-
-export default class LoginScreen extends Component {
-
-    constructor(props) {
-      super(props)
-    
-      this.state = {
-         
-      }
-    }
-    
-
-  render() {
-    return (
-      <div>
-        
-      </div>
-    )
-  }
-}
-```
-
-2，在`render()`中构建静态页面
-
-```
-render() {
-    return (
-      <div>
-        <NavBar
-            mode="dark"
-        >登录</NavBar>
-        <WhiteSpace/>
-        <List>
-            <InputItem
-                type={'text'}
-                placeholder={'请输入登录用户名'}
-            >
-                用户名
-            </InputItem>
-            <InputItem
-                type={'password'}
-                placeholder={'请输入登录密码'}
-            >
-                密码
-            </InputItem>
-        </List>
-        <WhiteSpace/>
-        <WingBlank>
-            <Button
-                type={'primary'}
-            >
-                登录
-            </Button>
-            <WhiteSpace/>
-            <Button
-                type={'primary'}
-            >
-                注册
-            </Button>
-        </WingBlank>
-      </div>
-    )
-  }
-```
-3，为输入组件添加受控组件机制：
-
-```
-import React, { Component } from 'react'
-
-import { 
-    Button,
-    Toast,
-    NavBar,
-    WingBlank, 
-    WhiteSpace ,
-    List,
-    InputItem,
-} from 'antd-mobile';
-
-import userManager from '../DataServer/UserManager';
-
-
 
 export default class LoginScreen extends Component {
 
@@ -853,23 +748,40 @@ export default class LoginScreen extends Component {
   render() {
     return (
       <div>
+        
+      </div>
+    )
+  }
+}
+```
+
+2，在`render()`函数中构建页面：
+
+* NavBar
+* 用户名输入框
+* 密码输入框
+* 登录按钮
+* 注册按钮
+
+```
+render() {
+    return (
+      <div>
         <NavBar
             mode="dark"
-        >登录</NavBar>
+        >
+            登录
+        </NavBar>
         <WhiteSpace/>
         <List>
             <InputItem
                 type={'text'}
-                value={this.state.username}
-                onChange={(username)=>{this.setState({username})}}
                 placeholder={'请输入登录用户名'}
             >
                 用户名
             </InputItem>
             <InputItem
                 type={'password'}
-                value={this.state.password}
-                onChange={(password)=>{this.setState({password})}}
                 placeholder={'请输入登录密码'}
             >
                 密码
@@ -892,13 +804,35 @@ export default class LoginScreen extends Component {
       </div>
     )
   }
-}
-
 ```
 
-4，响应按钮事件：
+3，添加输入框受控组件机制：
 
-登录按钮
+```
+<InputItem
+    type={'text'}
+    value={this.state.username}
+    onChange={(username)=>{this.setState({username})}}
+    placeholder={'请输入登录用户名'}
+>
+    用户名
+</InputItem>
+```
+
+```
+<InputItem
+    type={'password'}
+    value={this.state.password}
+    onChange={(password)=>{this.setState({password})}}
+    placeholder={'请输入登录密码'}
+>
+    密码
+</InputItem>
+```
+
+4，添加页面响应事件
+
+登录按钮事件，点击之后通过`userManager`对象进行登录操作，判断登录结果，成功跳转`HomeScree`失败提示用户原因。
 
 ```
 onLoginClick = async ()=>{
@@ -912,16 +846,6 @@ onLoginClick = async ()=>{
 }
 ```
 
-注册按钮
-
-```
-onRegisterClick = ()=>{
-    this.props.history.push('/RegisterScreen')
-}
-```
-
-配置按钮点击事件`onClick`属性
-
 ```
 <Button
     type={'primary'}
@@ -929,14 +853,33 @@ onRegisterClick = ()=>{
 >
     登录
 </Button>
-<WhiteSpace/>
+```
+
+注册按钮，点击跳转注册页面
+
+```
 <Button
     type={'primary'}
-    onClick={this.onRegisterClick}
+    onClick={()=>{
+        this.props.history.push('/RegisterScreen')
+    }}
 >
     注册
 </Button>
 ```
+
+5，声明周期函数配置
+
+当用户直接通过链接访问该页面时，如当时为已登录状态，自动跳转到Home主页：
+
+```
+componentDidMount(){
+    if(userManager.isLogin() === true){
+        this.props.history.replace('/HomeScreen');
+    }
+}
+```
+
 
 完整参考代码：
 
@@ -955,8 +898,6 @@ import {
 
 import userManager from '../DataServer/UserManager';
 
-
-
 export default class LoginScreen extends Component {
 
     constructor(props) {
@@ -966,14 +907,25 @@ export default class LoginScreen extends Component {
          username:'',
          password:''
       }
-    } 
+    }
+    
+
+    componentDidMount(){
+        if(userManager.isLogin() === true){
+            this.props.history.replace('/HomeScreen');
+        }
+    }
+
+    
 
     render() {
         return (
             <div>
             <NavBar
                 mode="dark"
-            >登录</NavBar>
+            >
+                登录
+            </NavBar>
             <WhiteSpace/>
             <List>
                 <InputItem
@@ -1004,7 +956,9 @@ export default class LoginScreen extends Component {
                 <WhiteSpace/>
                 <Button
                     type={'primary'}
-                    onClick={this.onRegisterClick}
+                    onClick={()=>{
+                        this.props.history.push('/RegisterScreen')
+                    }}
                 >
                     注册
                 </Button>
@@ -1021,19 +975,12 @@ export default class LoginScreen extends Component {
         }
         this.props.history.replace('/HomeScreen');
     }
-
-    onRegisterClick = ()=>{
-        this.props.history.push('/RegisterScreen')
-    }
 }
-
 ```
 
 ### 构建RegisterScreen
 
-RegisterScreen和LoginScreen构建过程相似，唯一区别为点击按钮是调用`userManager`中的`register`方法。
-
-参考代码：
+1，构建文件模板，引入相关依赖，配置State初值
 
 ```
 import React, { Component } from 'react'
@@ -1052,6 +999,142 @@ import {
 import userManager from '../DataServer/UserManager';
 
 export default class RegisterScreen extends Component {
+
+    constructor(props) {
+      super(props)
+    
+      this.state = {
+         username:'',
+         password:''
+      }
+    }
+
+    render(){
+
+    }
+}
+```
+
+2，在`render()`函数中构建页面：
+
+* NavBar
+* 用户名输入框
+* 密码输入框
+* 注册按钮
+
+```
+render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+        >注册</NavBar>
+        <WhiteSpace/>
+        <List>
+            <InputItem
+                type={'text'}
+                placeholder={'请输入注册用户名'}
+            >
+                用户名
+            </InputItem>
+            <InputItem
+                type={'text'}
+                placeholder={'请输入注册密码'}
+            >
+                密码
+            </InputItem>
+        </List>
+        <WhiteSpace/>
+        <WingBlank>
+            <Button
+                type={'primary'}
+            >
+                提交注册
+            </Button>
+        </WingBlank>
+      </div>
+    )
+  }
+```
+
+3，添加输入框受控组件机制
+
+```
+<InputItem
+    type={'text'}
+    value={this.state.username}
+    onChange={(username)=>{this.setState({username})}}
+    placeholder={'请输入注册用户名'}
+>
+    用户名
+</InputItem>
+```
+
+```
+<InputItem
+    type={'text'}
+    value={this.state.password}
+    onChange={(password)=>{this.setState({password})}}
+    placeholder={'请输入注册密码'}
+>
+    密码
+</InputItem>
+```
+
+4，添加页面响应事件
+
+点击注册按钮，通过数据服务对象进行注册，注册成功跳转Home，失败提示用户原因
+
+```
+  onRegister = async()=>{
+    const reslut = await userManager.register(this.state.username,this.state.password);
+    console.log(reslut);
+    if(reslut.success === false){
+        Toast.fail(reslut.errorMessage,1);
+        return;
+    }
+    this.props.history.replace('/HomeScreen');
+  }
+```
+
+5，声明周期函数配置
+
+当用户直接通过链接访问该页面时，如当时为已登录状态，自动跳转到Home主页：
+
+```
+componentDidMount(){
+    if(userManager.isLogin() === true){
+        this.props.history.replace('/HomeScreen');
+    }
+}
+```
+
+完整参考代码：
+
+```
+import React, { Component } from 'react'
+
+import { 
+    Button,
+    Toast,
+    NavBar,
+    WingBlank, 
+    WhiteSpace ,
+    List,
+    InputItem,
+    Icon
+} from 'antd-mobile';
+
+import userManager from '../DataServer/UserManager';
+
+export default class RegisterScreen extends Component {
+
+    componentDidMount(){
+        if(userManager.isLogin() === true){
+            this.props.history.replace('/HomeScreen');
+        }
+    }
 
 
     constructor(props) {
@@ -1095,16 +1178,7 @@ export default class RegisterScreen extends Component {
         <WingBlank>
             <Button
                 type={'primary'}
-                onClick={async()=>{
-                    const reslut = await userManager.register(this.state.username,this.state.password);
-                    console.log(reslut);
-                    if(reslut.success === false){
-                        Toast.fail(reslut.errorMessage);
-                        return;
-                    }
-                    this.props.history.replace('/HomeScreen');
-                    
-                }}
+                onClick={this.onRegister}
             >
                 提交注册
             </Button>
@@ -1112,14 +1186,25 @@ export default class RegisterScreen extends Component {
       </div>
     )
   }
+
+  onRegister = async()=>{
+    const reslut = await userManager.register(this.state.username,this.state.password);
+    console.log(reslut);
+    if(reslut.success === false){
+        Toast.fail(reslut.errorMessage,1);
+        return;
+    }
+    this.props.history.replace('/HomeScreen');
+  }
 }
+
 ```
 
 ### 构建HomeScreen
 
-HomeScreen承载消息展示功能。点击消息可以跳转到消息评论页面，NavBar左边是退出登录按钮，右边是发布消息功能。
+HomeScreen展示所有用户的留言信息，并提供下拉刷新功能。点击留言条目可以进入该留言的评论页面。
 
-1，首先构造基础语法模板，引入相关组件：
+1，构建文件模板，引入相关依赖，配置State初值
 
 ```
 import React, { Component } from 'react'
@@ -1135,57 +1220,31 @@ import messageManager from '../DataServer/MessageManager';
 import userManager from '../DataServer/UserManager';
 
 export default class HomeScreen extends Component {
-    render() {
-        return (
-            <div>
-            </div>
-        ) 
-    }
-} 
-```
 
-2，响应`componentDidMount()`声明周期函数。
+    constructor(props) {
+        super(props)
 
-该函数中首先对登录状态进行验证，对没有登录状态的请求进行拦截。在成功请求之后，调用数据服务对象请求消息数据。
+        const dataSource = new ListView.DataSource({
+            rowHasChanged:(row1, row2) => row1 !== row2,
+        })
 
-```
-async componentDidMount(){
-
-    if(!userManager.isLogin()){
-        this.props.history.replace('/');
-        return;
+        this.state = {
+            dataSource,
+            refreshing:false
+        }
     }
 
-    const result = await messageManager.allMessages()
-    if(result.success === false){
-        Toast.fail(result.errorMessage);
-        return;
+    render(){
+
     }
-    this.setState((preState)=>{
-        return{
-            dataSource:preState.dataSource.cloneWithRows(result.data)
-        }   
-    })
 
 }
 ```
 
-3，使用`render()`方法构建页面,页面中包含NavBar和ListView
+2，在`render()`函数中构建页面元素：
 
-```
-constructor(props) {
-    super(props)
-
-    const dataSource = new ListView.DataSource({
-        rowHasChanged:(row1, row2) => row1 !== row2,
-    })
-
-    this.state = {
-        dataSource,
-        refreshing:false
-    }
-}
-```
+* NavBar
+* ListView
 
 ```
 render() {
@@ -1214,35 +1273,43 @@ render() {
         <ListView
             useBodyScroll={true}
             dataSource={this.state.dataSource}
-            renderRow={(message)=>{
-                return (
-                    <p>{`${message.title}:${message.content}`}</p>
-                )
-            }}
         />
       </div>
+    )
+  }
+```
+
+3，配置ListView简易renderRow函数:
+
+```
+renderRow = (message)=>{
+    return (
+        <p>{`${message.id}:${message.title}`}</p>
     )
 }
 ```
 
-4，为ListView添加下拉刷新功能：
+4，添加ListView下拉刷新功能
 
-构造响应刷新事件函数
+定义刷新响应函数：
 
 ```
 onRefresh = async()=>{
     try {
         this.setState({refreshing:true});
-        const result = await messageManager.allMessages()
+        const result = await messageManager.allMessages();
+        this.setState({refreshing:false});
         if(result.success === false){
             Toast.fail(result.errorMessage);
-            this.setState({refreshing:false});
+            if(result.errorCode === 10004){
+                userManager.logout();
+                this.props.history.replace('/');
+            }
             return;
         }
         this.setState((preState)=>{
             return{
                 dataSource:preState.dataSource.cloneWithRows(result.data),
-                refreshing:false
             }   
         })
     } catch (error) {
@@ -1252,8 +1319,7 @@ onRefresh = async()=>{
 
 }
 ```
-
-配置ListView下拉刷新组件
+配置ListView下拉刷新组件：
 
 ```
 <ListView
@@ -1265,20 +1331,41 @@ onRefresh = async()=>{
             onRefresh={this.onRefresh}
         />
     }
-    renderRow={(message)=>{
-        return (
-            <HomeListItem 
-                {...message}
-                onItemClick={()=>{
-                    this.props.history.push('/CommentScreen',todo)
-                }} 
-            />
-        )
-    }}
+    renderRow={this.renderRow}
 />
 ```
 
-5，封装HomeListItem优化Message展示效果并提供点击事件接口：
+5，声明周期函数配置
+
+在页面加载完成之后首先判断登录状态，如未登录，即跳转到登录页。如登录请求数据进行显示
+
+```
+async componentDidMount(){
+    if(userManager.isLogin() === false){
+        this.props.history.replace('/');
+        return;
+    }
+
+    const result = await messageManager.allMessages()
+    if(result.success === false){
+        Toast.fail(result.errorMessage);
+        if(result.errorCode === 10004){
+            userManager.logout();
+            this.props.history.replace('/');
+        }
+        return;
+    }
+    this.setState((preState)=>{
+        return{
+            dataSource:preState.dataSource.cloneWithRows(result.data)
+        }   
+    })
+}
+```
+
+6，构造HomeListItem组件
+
+该最近封装了对留言数据的展示样式，且提供一个点击事件接口。
 
 ```
 import React, { Component } from 'react'
@@ -1309,8 +1396,9 @@ export default class HomeListItem extends Component {
 
     return (
         <div
-            onClick={()=>{
+            onClick={(e)=>{
                 if(this.props.onItemClick){
+                    e.stopPropagation();
                     this.props.onItemClick();
                 }   
             }}
@@ -1323,8 +1411,8 @@ export default class HomeListItem extends Component {
                         extra={moment(this.props.createdAt).format('YYYY-MM-DD HH:mm')}
                     />
                     <Card.Body>
-                        <span>
-                        {this.props.content}
+                        <span id='content'>
+                            {this.props.content}
                         </span>
                         <Grid
                             data={images}
@@ -1352,9 +1440,10 @@ export default class HomeListItem extends Component {
   }
 }
 ```
+样式文件：
 
 ```
-span{
+#content{
     word-break:normal;
     width:auto; 
     display:block; 
@@ -1364,7 +1453,32 @@ span{
 }  
 ```
 
-6，HomeScreen完整实现代码：
+7，使用HomeListItem优化HomeScreen
+
+```
+renderRow = (message)=>{
+    return (
+        <HomeListItem 
+            {...message}
+        />
+    )
+}
+```
+
+8，响应Item点击事件，事件接口为`onItemClick`。
+
+在该点击事件中，调整到评论也，且同时将被点击的留言ID传过去
+
+```
+<HomeListItem 
+    {...message}
+    onItemClick={()=>{
+        this.props.history.push('/CommentScreen/'+message.id)
+    }} 
+/>
+```
+
+完整实现代码：
 
 ```
 import React, { Component } from 'react'
@@ -1387,7 +1501,7 @@ export default class HomeScreen extends Component {
 
     async componentDidMount(){
 
-        if(!userManager.isLogin()){
+        if(userManager.isLogin() === false){
             this.props.history.replace('/');
             return;
         }
@@ -1395,6 +1509,10 @@ export default class HomeScreen extends Component {
         const result = await messageManager.allMessages()
         if(result.success === false){
             Toast.fail(result.errorMessage);
+            if(result.errorCode === 10004){
+                userManager.logout();
+                this.props.history.replace('/');
+            }
             return;
         }
         this.setState((preState)=>{
@@ -1402,7 +1520,6 @@ export default class HomeScreen extends Component {
                 dataSource:preState.dataSource.cloneWithRows(result.data)
             }   
         })
-
     }
 
     constructor(props) {
@@ -1421,16 +1538,19 @@ export default class HomeScreen extends Component {
     onRefresh = async()=>{
         try {
             this.setState({refreshing:true});
-            const result = await messageManager.allMessages()
+            const result = await messageManager.allMessages();
+            this.setState({refreshing:false});
             if(result.success === false){
                 Toast.fail(result.errorMessage);
-                this.setState({refreshing:false});
+                if(result.errorCode === 10004){
+                    userManager.logout();
+                    this.props.history.replace('/');
+                }
                 return;
             }
             this.setState((preState)=>{
                 return{
                     dataSource:preState.dataSource.cloneWithRows(result.data),
-                    refreshing:false
                 }   
             })
         } catch (error) {
@@ -1473,36 +1593,31 @@ export default class HomeScreen extends Component {
                     onRefresh={this.onRefresh}
                 />
             }
-            renderRow={(message)=>{
-                return (
-                    <HomeListItem 
-                        {...message}
-                        onItemClick={()=>{
-                            this.props.history.push('/CommentScreen',message)
-                        }} 
-                    />
-                )
-            }}
+            renderRow={this.renderRow}
         />
       </div>
     )
   }
+
+    renderRow = (message)=>{
+        return (
+            <HomeListItem 
+                {...message}
+                onItemClick={()=>{
+                    this.props.history.push('/CommentScreen/'+message.id)
+                }} 
+            />
+        )
+    }
 }
-```
-
-### 构建CreateMessageScreen
-
-发布消息功能提供添加图片功能，最多允许用户添加9张图片，使用Ant中的`ImagePicker`实现。
 
 ```
-<ImagePicker
-    files={this.state.files}
-    onChange={(files)=>{this.setState({files})}}
-    selectable={this.state.files.length <= 9}
-/>
-```
 
-完整参考代码：
+### 构建发消息页面
+
+在发送消息页面，用户可以编辑一个消息进行发送，消息由标题，内容和最多不超过9张图片组成。
+
+1，构建文件模板，引入相关依赖，配置State初值
 
 ```
 import React, { Component } from 'react'
@@ -1537,12 +1652,162 @@ export default class CreateMessageScreen extends Component {
       }
     }
 
-    componentWillMount(){
-        if(!userManager.isLogin()){
+    render(){
+
+    }
+}
+```
+
+2，在`render()`函数中构建页面元素：
+
+* NavBar
+* 标题输入框
+* 内容输入框
+* 图片选择器
+* 提交按钮
+
+```
+render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+            onLeftClick={() => {this.props.history.goBack()}}
+        >发消息</NavBar>
+        <WhiteSpace/>
+        <List>
+            <InputItem
+                type={'text'}
+                placeholder={'请输入事项标题'}
+            >
+                标题
+            </InputItem>
+            <TextareaItem
+                type={'text'}
+                placeholder={'请输入内容'}
+                autoHeight={true}
+            />
+        </List>
+        <WhiteSpace/>
+        <WingBlank>
+            <ImagePicker
+                selectable={this.state.files.length <= 9}
+            />
+            <WhiteSpace/>
+            <Button
+                type={'primary'}
+            >
+                提交
+            </Button>
+        </WingBlank>
+      </div>
+    )
+  }
+```
+
+3，添加输入框受控组件机制:
+
+```
+<InputItem
+    type={'text'}
+    value={this.state.title}
+    onChange={(title)=>{this.setState({title})}}
+    placeholder={'请输入事项标题'}
+>
+    标题
+</InputItem>
+```
+
+```
+<TextareaItem
+    type={'text'}
+    value={this.state.content}
+    onChange={(content)=>{this.setState({content})}}
+    placeholder={'请输入内容'}
+    autoHeight={true}
+/>
+```
+
+```
+<ImagePicker
+    files={this.state.files}
+    onChange={(files)=>{this.setState({files})}}
+    selectable={this.state.files.length <= 9}
+/>
+```
+
+4，添加页面响应事件
+
+提交消息操作，通过数据服务对象完成该操作，成功提示用户，且点击确认返回Home。失败提示用户原因。
+
+```
+submitMessage = async()=>{
+    Toast.loading('内容上传中...',0);
+    const resutl = await messageManager.postMessage(this.state.title,this.state.content,this.state.files);
+    Toast.hide();
+    if(resutl.success === false){
+        Toast.fail(resutl.errorMessage);
+        return;
+    }
+    Modal.alert('提交成功','点击确认键返回',[{
+        text:'确认',
+        onPress:()=>{this.props.history.goBack()}
+    }])
+}
+```
+
+
+5，声明周期函数配置
+
+```
+componentDidMount(){
+    if(userManager.isLogin() === false){
+        this.props.history.replace('/');
+    }
+}
+```
+
+完整实现代码：
+
+```
+import React, { Component } from 'react'
+
+import { 
+    Button,
+    Toast,
+    NavBar,
+    WingBlank, 
+    WhiteSpace ,
+    List,
+    InputItem,
+    Icon,
+    TextareaItem,
+    Modal,
+    ImagePicker
+} from 'antd-mobile';
+
+import messageManager from '../DataServer/MessageManager';
+import userManager from '../DataServer/UserManager';
+
+
+export default class CreateMessageScreen extends Component {
+
+    componentDidMount(){
+        if(userManager.isLogin() === false){
             this.props.history.replace('/');
         }
     }
+
+    constructor(props) {
+      super(props)
     
+      this.state = {
+         title:'',
+         content:'',
+         files:[]
+      }
+    }
 
   render() {
     return (
@@ -1580,20 +1845,7 @@ export default class CreateMessageScreen extends Component {
             <WhiteSpace/>
             <Button
                 type={'primary'}
-                onClick={async()=>{
-                    Toast.loading('内容上传中...',0);
-                    const resutl = await messageManager.postMessage(this.state.title,this.state.content,this.state.files);
-                    Toast.hide();
-                    if(resutl.success === false){
-                        Toast.fail(resutl.errorMessage);
-                        return;
-                    }
-                    Modal.alert('提交成功','点击确认键返回',[{
-                        text:'确认',
-                        onPress:()=>{this.props.history.goBack()}
-                    }])
-
-                }}
+                onClick={this.submitMessage}
             >
                 提交
             </Button>
@@ -1601,12 +1853,189 @@ export default class CreateMessageScreen extends Component {
       </div>
     )
   }
+
+    submitMessage = async()=>{
+        Toast.loading('内容上传中...',0);
+        const resutl = await messageManager.postMessage(this.state.title,this.state.content,this.state.files);
+        Toast.hide();
+        if(resutl.success === false){
+            Toast.fail(resutl.errorMessage);
+            return;
+        }
+        Modal.alert('提交成功','点击确认键返回',[{
+            text:'确认',
+            onPress:()=>{this.props.history.goBack()}
+        }])
+    }
+}
+```
+### 构建评论页面
+
+评论页面显示该条消息的所有评论信息，并提供下拉刷新功能。
+
+1，构建文件模板，引入相关依赖，配置State初值
+
+```
+import React, { Component } from 'react'
+
+import { 
+    Toast,
+    NavBar,
+    ListView,
+    Icon,
+    PullToRefresh
+} from 'antd-mobile';
+
+import messageManager from '../DataServer/MessageManager';
+import userManager from '../DataServer/UserManager';
+
+export default class CommentScreen extends Component {
+    
+    constructor(props) {
+        super(props)
+
+        const dataSource = new ListView.DataSource({
+            rowHasChanged:(row1, row2) => row1 !== row2,
+        })
+
+        this.state = {
+            dataSource,
+            refreshing:false
+        }
+    }
 }
 ```
 
-### 构建CommentScreen
+2，在`render()`函数中构建页面元素：
 
-1，构建CommentListItem组件：
+* NavBar
+* ListView
+
+```
+render() {
+    return (
+      <div>
+        <NavBar
+            mode="dark"
+            icon={<Icon type="left" />}
+            onLeftClick={() => {this.props.history.goBack()}}
+            rightContent={[
+                <span
+                    key={1}
+                    onClick={()=>{
+                        this.props.history.push('/CreateCommentScreen',{id:this.props.history.location.state.id});
+                    }}
+                >发评论</span>
+            ]}
+        >评论</NavBar>
+        <ListView
+            useBodyScroll={true}
+            dataSource={this.state.dataSource}
+        />
+      </div>
+    )
+  }
+```
+
+3，构建ListView的简易`renderRow`函数:
+
+在简易`renderRow`函数中，只需要显示部分留言数据即可，无需关注事件与样式。
+
+```
+renderRow = (comment)=>{
+    return (
+        <p>{`${comment.id}:${comment.content}`}</p>
+    )
+}
+```
+
+4，添加ListView下拉刷新功能
+
+定义下拉刷新响应函数：
+
+```
+onRefresh = async()=>{
+    try {
+        this.setState({refreshing:true});
+        const result = await messageManager.allComments(this.props.history.location.state.id);
+        if(result.success === false){
+            Toast.fail(result.errorMessage);
+            if(result.errorCode === 10004){
+                userManager.logout();
+                this.props.history.replace('/');
+            }
+            this.setState({refreshing:false});
+            return;
+        }
+        this.setState((preState)=>{
+            return{
+                dataSource:preState.dataSource.cloneWithRows(result.data),
+                refreshing:false
+            }   
+        })
+    } catch (error) {
+        Toast.fail(`${error}`);
+        this.setState({refreshing:false});
+    }
+
+}
+```
+
+配置ListView下拉刷新组件：
+
+```
+<ListView
+    useBodyScroll={true}
+    dataSource={this.state.dataSource}
+    renderRow={this.renderRow}
+    pullToRefresh={
+        <PullToRefresh
+            refreshing={this.state.refreshing}
+            onRefresh={this.onRefresh}
+        />
+    }
+/>
+```
+
+
+5，声明周期函数配置
+
+```
+async componentDidMount(){
+
+    if(!userManager.isLogin()){
+        this.props.history.replace('/');
+        return;
+    }
+    const messageID = this.props.match.params.id;
+    const result = await messageManager.allComments(messageID)
+    console.log(result)
+    if(result.success === false){
+        Toast.fail(result.errorMessage);
+        if(result.errorCode === 10004){
+            userManager.logout();
+            this.props.history.replace('/');
+        }
+        return;
+    }
+
+    if(result.data.length === 0){
+        Toast.info('无评论记录',1);
+        return;
+    }
+
+    this.setState((preState)=>{
+        return{
+            dataSource:preState.dataSource.cloneWithRows(result.data)
+        }   
+    })
+
+}
+```
+
+6，构造CommentListItem组件
+
+该组件封装评论内容的展示样式：
 
 ```
 import React, { Component } from 'react'
@@ -1634,7 +2063,7 @@ export default class HomeListItem extends Component {
                         extra={moment(this.props.createdAt).format('YYYY-MM-DD HH:mm')}
                     />
                     <Card.Body>
-                        <span>
+                        <span id='content'>
                             {this.props.content}
                         </span>
                     </Card.Body>
@@ -1647,8 +2076,10 @@ export default class HomeListItem extends Component {
 
 ```
 
+样式文件：
+
 ```
-span{
+#content{
     word-break:normal;
     width:auto; 
     display:block; 
@@ -1658,7 +2089,19 @@ span{
 }  
 ```
 
-2，参考实现代码：
+7，使用CommentListItem优化CommentScreen内容展示
+
+```
+renderRow = (comment)=>{
+    return (
+        <CommentListItem 
+            {...message}
+        />
+    )
+}
+```
+
+完整实现代码：
 
 ```
 import React, { Component } from 'react'
@@ -1687,11 +2130,15 @@ export default class CommentScreen extends Component {
             this.props.history.replace('/');
             return;
         }
-
-        const result = await messageManager.allComments(this.props.history.location.state.id)
+        const messageID = this.props.match.params.id;
+        const result = await messageManager.allComments(messageID)
         console.log(result)
         if(result.success === false){
             Toast.fail(result.errorMessage);
+            if(result.errorCode === 10004){
+                userManager.logout();
+                this.props.history.replace('/');
+            }
             return;
         }
 
@@ -1728,6 +2175,10 @@ export default class CommentScreen extends Component {
             const result = await messageManager.allComments(this.props.history.location.state.id);
             if(result.success === false){
                 Toast.fail(result.errorMessage);
+                if(result.errorCode === 10004){
+                    userManager.logout();
+                    this.props.history.replace('/');
+                }
                 this.setState({refreshing:false});
                 return;
             }
@@ -1763,13 +2214,7 @@ export default class CommentScreen extends Component {
         <ListView
             useBodyScroll={true}
             dataSource={this.state.dataSource}
-            renderRow={(message)=>{
-                return (
-                    <CommentListItem 
-                        {...message}
-                    />
-                )
-            }}
+            renderRow={this.renderRow}
             pullToRefresh={
                 <PullToRefresh
                     refreshing={this.state.refreshing}
@@ -1780,10 +2225,21 @@ export default class CommentScreen extends Component {
       </div>
     )
   }
+
+    renderRow = (comment)=>{
+        return (
+            <CommentListItem 
+                {...comment}
+            />
+        )
+    }
 }
 ```
 
-### 构建CreateCommentScreen
+
+### 构建发布评论页面
+
+1，构建文件模板，引入相关依赖，配置State初值
 
 ```
 import React, { Component } from 'react'
@@ -1814,15 +2270,17 @@ export default class CreateMessageScreen extends Component {
          content:''
       }
     }
+}
+```
 
-    componentWillMount(){
-        if(!userManager.isLogin()){
-            this.props.history.replace('/');
-        }
-    }
-    
+2，在`render()`函数中构建页面元素：
 
-  render() {
+* NavBar
+* 评论内容输入框
+* 提交按钮
+
+```
+render() {
     return (
       <div>
         <NavBar
@@ -1834,8 +2292,6 @@ export default class CreateMessageScreen extends Component {
         <List>
             <TextareaItem
                 type={'text'}
-                value={this.state.content}
-                onChange={(content)=>{this.setState({content})}}
                 placeholder={'请输入评论内容'}
                 autoHeight={true}
             />
@@ -1844,20 +2300,6 @@ export default class CreateMessageScreen extends Component {
         <WingBlank>
             <Button
                 type={'primary'}
-                onClick={async()=>{
-                    Toast.loading('内容上传中...',0);
-                    const resutl = await messageManager.postComment(this.props.history.location.state.id,this.state.content);
-                    Toast.hide();
-                    if(resutl.success === false){
-                        Toast.fail(resutl.errorMessage);
-                        return;
-                    }
-                    Modal.alert('提交成功','点击确认键返回',[{
-                        text:'确认',
-                        onPress:()=>{this.props.history.goBack()}
-                    }])
-
-                }}
             >
                 提交
             </Button>
@@ -1865,7 +2307,147 @@ export default class CreateMessageScreen extends Component {
       </div>
     )
   }
-}
+```
+
+3，添加输入框受控组件机制:
 
 ```
+<TextareaItem
+    type={'text'}
+    value={this.state.content}
+    onChange={(content)=>{this.setState({content})}}
+    placeholder={'请输入评论内容'}
+    autoHeight={true}
+/>
+```
+
+4，添加页面响应事件
+
+点击提交按钮，通过数据服务对象提交评论内容，并提示用户操作结果
+
+```
+submitComment = async () => {
+    Toast.loading('内容上传中...', 0);
+    const messageID = this.props.match.params.id;
+    const result = await messageManager.postComment(messageID, this.state.content);
+    Toast.hide();
+    if (result.success === false) {
+        Toast.fail(result.errorMessage);
+        if (result.errorCode === 10004) {
+            userManager.logout();
+            this.props.history.replace('/');
+        }
+        return;
+    }
+    Modal.alert('提交成功', '点击确认键返回', [{
+        text: '确认',
+        onPress: () => { this.props.history.goBack() }
+    }])
+
+}
+```
+
+5，声明周期函数配置
+
+```
+componentDidMount() {
+    if (!userManager.isLogin()) {
+        this.props.history.replace('/');
+    }
+}
+```
+
+完整实现代码：
+
+```
+import React, { Component } from 'react'
+
+import {
+    Button,
+    Toast,
+    NavBar,
+    WingBlank,
+    WhiteSpace,
+    List,
+    Icon,
+    TextareaItem,
+    Modal
+} from 'antd-mobile';
+
+import messageManager from '../DataServer/MessageManager';
+import userManager from '../DataServer/UserManager';
+
+
+export default class CreateMessageScreen extends Component {
+
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            title: '',
+            content: ''
+        }
+    }
+
+    componentDidMount() {
+        if (!userManager.isLogin()) {
+            this.props.history.replace('/');
+        }
+    }
+
+
+    render() {
+        return (
+            <div>
+                <NavBar
+                    mode="dark"
+                    icon={<Icon type="left" />}
+                    onLeftClick={() => { this.props.history.goBack() }}
+                >发评论</NavBar>
+                <WhiteSpace />
+                <List>
+                    <TextareaItem
+                        type={'text'}
+                        value={this.state.content}
+                        onChange={(content) => { this.setState({ content }) }}
+                        placeholder={'请输入评论内容'}
+                        autoHeight={true}
+                    />
+                </List>
+                <WhiteSpace />
+                <WingBlank>
+                    <Button
+                        type={'primary'}
+                        onClick={this.submitComment}
+                    >
+                        提交
+            </Button>
+                </WingBlank>
+            </div>
+        )
+    }
+
+    submitComment = async () => {
+        Toast.loading('内容上传中...', 0);
+        const messageID = this.props.match.params.id;
+        const result = await messageManager.postComment(messageID, this.state.content);
+        Toast.hide();
+        if (result.success === false) {
+            Toast.fail(result.errorMessage);
+            if (result.errorCode === 10004) {
+                userManager.logout();
+                this.props.history.replace('/');
+            }
+            return;
+        }
+        Modal.alert('提交成功', '点击确认键返回', [{
+            text: '确认',
+            onPress: () => { this.props.history.goBack() }
+        }])
+
+    }
+}
+```
+
+
 

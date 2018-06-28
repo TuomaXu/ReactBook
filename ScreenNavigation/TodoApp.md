@@ -821,31 +821,6 @@ export default App;
 
 ```
 
-### 非登录授权访问拦截
-
-在有登录或授权的机制中，通过浏览器地址栏中访问非授权页面是需要根据当前授权状态判断是否拦截。在本App中，登录注册Screen访问为非授权访问，可以通过地址栏进行直接跳转。但HomeScreen和CreateTodoScreen需要根据登录状态进行拦截操作。
-
-拦截操作通过`this.props.history.replace('/')`，跳转到跟视图。拦截操作在声明周期函数的`componentDidMount()`中进行。
-
-参考代码：
-
-```
-import React, { Component } from 'react'
-
-import userManager from '../DataServer/UserManager';
-
-export default class XXXScreen extends Component {
-
-    componentDidMount(){
-
-        if(!userManager.isLogin()){
-            this.props.history.replace('/');
-            return;
-        }
-    }
-}
-```
-
 
 ### 构建LoginScreen
 
